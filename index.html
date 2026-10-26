@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NADNAPS · it tells you when you're wrong</title>
+<meta name="description" content="A Linux terminal app for NSE research: builds its own point-in-time database and tests trading rules against random portfolios. Early access waitlist.">
+<meta property="og:title" content="NADNAPS · it tells you when you're wrong">
+<meta property="og:description" content="Test trading rules on NSE data since 2010, against random portfolios, in your Linux terminal. Join the early-access list.">
+<meta property="og:image" content="img/console.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  /* NADNAPS sub-brand (brand.json palette_nadnaps): gruvbox, JetBrains Mono */
+  :root { --bg:#1d2021; --bg2:#282828; --line:#3c3836; --fg:#ebdbb2; --muted:#a89984; --y:#fabd2f; --y2:#d79921; --red:#fb4934; --aqua:#8ec07c; --green:#b8bb26; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--fg); font: 400 17px/1.6 "JetBrains Mono", ui-monospace, monospace; }
+  a { color: var(--y); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+  header { padding: 22px 0; }
+  .logo { display: inline-flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: .14em; text-decoration: none; color: var(--fg); }
+  .logo i { width: 36px; height: 36px; border-radius: 8px; background: var(--y); color: var(--bg); font: 800 22px/36px "JetBrains Mono"; text-align: center; font-style: normal; }
+  .hero { padding: 56px 0 40px; }
+  .kicker { color: var(--y2); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: 14px; }
+  h1 { font-size: clamp(36px, 7vw, 68px); line-height: 1.05; font-weight: 800; letter-spacing: -.02em; margin: 14px 0 20px; }
+  h1 span { color: var(--y); }
+  .lead { color: var(--muted); font-size: clamp(17px, 2.4vw, 20px); max-width: 720px; }
+  .lead b { color: var(--fg); font-weight: 600; }
+  form { margin-top: 34px; display: flex; flex-wrap: wrap; gap: 12px; max-width: 620px; }
+  input[type=email] { flex: 1 1 280px; padding: 15px 16px; border-radius: 10px; border: 2px solid var(--line); background: var(--bg2);
+                      color: var(--fg); font: inherit; }
+  input[type=email]:focus { outline: none; border-color: var(--y); }
+  button { padding: 15px 22px; border: 0; border-radius: 10px; background: var(--y); color: var(--bg); font: 800 16px "JetBrains Mono"; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: default; }
+  .hp { position: absolute; left: -9999px; }
+  .formnote { margin-top: 12px; color: var(--muted); font-size: 14px; }
+  .ok { display: none; margin-top: 18px; padding: 16px 18px; border-radius: 10px; background: var(--bg2); border: 2px solid var(--green); color: var(--fg); }
+  .err { display: none; margin-top: 12px; color: var(--red); font-size: 14px; }
+  .term { background: var(--bg2); border: 2px solid var(--line); border-radius: 14px; padding: 18px 22px; margin: 22px 0; font-size: 16px; overflow-x: auto; }
+  .term .p { color: var(--green); } .term .a { color: var(--aqua); } .term .r { color: var(--red); } .term .c { color: var(--muted); }
+  section { padding: 44px 0; border-top: 2px solid var(--line); }
+  h2 { font-size: clamp(24px, 4vw, 34px); line-height: 1.2; font-weight: 800; margin-bottom: 14px; }
+  h2 span { color: var(--y); }
+  p + p { margin-top: 12px; }
+  figure { margin-top: 24px; }
+  figure img { width: 100%; border-radius: 12px; border: 2px solid var(--line); display: block; }
+  figcaption { color: var(--muted); font-size: 14px; margin-top: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 22px; }
+  .card { background: var(--bg2); border: 2px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+  .card h3 { font-size: 17px; color: var(--y); margin-bottom: 6px; }
+  .card p { color: var(--muted); font-size: 15px; }
+  ul.req { list-style: none; margin-top: 14px; }
+  ul.req li { padding: 8px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+  ul.req li b { color: var(--fg); font-weight: 600; }
+  .disc { color: var(--muted); font-size: 14px; }
+  footer { padding: 34px 0 60px; color: var(--muted); font-size: 14px; border-top: 2px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><a class="logo" href="#"><i>N</i>NADNAPS</a></header>
+
+  <div class="hero">
+    <div class="kicker">Linux terminal app · NSE India · early access</div>
+    <h1>It tells you when <span>you're wrong.</span></h1>
+    <p class="lead">NADNAPS builds a clean, point-in-time database from NSE's own public files on your computer, then tests
+      trading rules against random baselines. <b>A rule counts as an edge only if it beats random picks on data it was not designed on.</b></p>
+
+    <form id="wl" novalidate>
+      <input type="email" id="email" name="email" placeholder="you@email.com" autocomplete="email" required aria-label="Email address">
+      <input class="hp" type="text" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button type="submit" id="btn">Get early access</button>
+    </form>
+    <div class="formnote">One email when the download is ready. No spam, no tips.</div>
+    <div class="err" id="err">That didn't go through. Please try again, or use <a id="fallback" href="#">this form</a>.</div>
+    <div class="ok" id="ok">You're on the list. We'll email you when NADNAPS is ready to download.</div>
+  </div>
+
+  <section>
+    <h2>The honest answer, <span>so far</span></h2>
+    <p>Every famous swing-trading rule tested in NADNAPS so far did no better than random picks or simply holding the market.
+      That's not a bug. It's the point: a backtest only means something once it's compared with random picks.</p>
+    <figure>
+      <img src="img/console.jpg" alt="NADNAPS research console dashboard: 59 backtest runs, 6 of 10 validation looks left, and the note that no run has passed yet." loading="lazy">
+      <figcaption>The research console: every run, its verdict, and whether the best result could be luck.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Did I <span>fool myself?</span></h2>
+    <p>Test periods are fixed in advance, validation looks are counted and limited, and a registered rule can't be quietly changed afterwards.
+      One screen exists just to ask whether your best result is luck.</p>
+    <figure>
+      <img src="img/honesty.jpg" alt="The 'Did I fool myself?' screen listing strategies, tries, best Sharpe, the chance it's luck, and a 'no edge' status." loading="lazy">
+      <figcaption>Each strategy family: tries, best result, and the chance that result is luck alone.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Write a rule in <span>plain text</span></h2>
+    <div class="term">
+      <div><span class="p">$</span> nadnaps rule check <span class="a">"close &gt; sma(200) and rsi(14) &lt; 35"</span></div>
+      <div><span class="p">$</span> nadnaps research my_rule train <span class="c"># 2012–2017, against random picks</span></div>
+      <div><span class="p">$</span> nadnaps stress my_rule <span class="c"># rerun at 1.5x and 2x costs</span></div>
+    </div>
+    <div class="grid">
+      <div class="card"><h3>66 textbook rules</h3><p>Start from a ready-made template, each marked "not tested here" unless it was, with what that test found.</p></div>
+      <div class="card"><h3>Your own rules</h3><p>MACD, Bollinger, ADX, stochastics, delivery %, Nifty, market breadth, weekly bars. Rank buys, set targets and stops.</p></div>
+      <div class="card"><h3>Against random portfolios</h3><p>Every run is compared with random picks using the same exits, sizing and costs.</p></div>
+      <div class="card"><h3>Real costs</h3><p>STT, stamp duty, exchange fees, DP charges, slippage. Re-price any run at Zerodha, Dhan, Groww, Angel One or Upstox charges.</p></div>
+      <div class="card"><h3>Reports you can open</h3><p>Verdict, charts, every trade, results by market regime, tax estimate by financial year.</p></div>
+      <div class="card"><h3>Stays on your computer</h3><p>Nothing about your lists, rules or results is ever sent anywhere.</p></div>
+    </div>
+    <figure>
+      <img src="img/reports.jpg" alt="The Reports screen in the NADNAPS terminal app, listing backtest runs with years, data split, CAGR, Sharpe, trades and verdict." loading="lazy">
+      <figcaption>The terminal app: every run with its data split and verdict.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>What you need</h2>
+    <ul class="req">
+      <li><b>Linux</b> (Windows and macOS are not tested yet)</li>
+      <li><b>Python 3.12, 3.13 or 3.14</b>, installed with pipx</li>
+      <li><b>About 4 GB of RAM</b>, and <b>about 8 GB of disk</b> for the first setup (about 3 GB afterwards)</li>
+      <li><b>Internet</b> for NSE's public files: history since 2010 on first setup, then daily updates</li>
+    </ul>
+    <form id="wl2" novalidate style="margin-top:30px">
+      <input type="email" id="email2" placeholder="you@email.com" autocomplete="email" required aria-label="Email address">
+      <button type="submit" id="btn2">Get early access</button>
+    </form>
+    <div class="ok" id="ok2">You're on the list. We'll email you when NADNAPS is ready to download.</div>
+  </section>
+
+  <section>
+    <p class="disc"><b>Research and education tool.</b> NADNAPS gives no buy or sell recommendations and no investment advice.
+      Past results do not predict future returns. Your email is used only to tell you when NADNAPS launches.</p>
+  </section>
+
+  <footer>
+    Made by <a href="https://www.instagram.com/dhairya_dada/">@dhairya_dada</a> · Dhairya rakho, data dekho.
+  </footer>
+</div>
+
+<script>
+  // Waitlist -> Google Form (responses land in its linked Sheet).
+  // Fill these two from the form's pre-filled link: .../forms/d/e/<FORM_ID>/viewform?usp=pp_url&entry.<ENTRY_ID>=test
+  const FORM_ID = "1FAIpQLSftF0B810R2D_bsiRVblp6gvFSf23SdfllnketNJE9-Lkd62w";
+  const ENTRY_ID = "198532299";
+  const ACTION = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
+  document.getElementById("fallback").href = `https://docs.google.com/forms/d/e/${FORM_ID}/viewform`;
+  const valid = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+
+  function wire(formId, inputId, btnId, okId) {
+    const f = document.getElementById(formId), inp = document.getElementById(inputId), btn = document.getElementById(btnId);
+    f.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const v = inp.value.trim(), err = document.getElementById("err");
+      err.style.display = "none";
+      if (!valid(v)) { inp.focus(); inp.setCustomValidity("Please enter a valid email"); inp.reportValidity(); inp.setCustomValidity(""); return; }
+      if (document.getElementById("website").value) return;          // bots fill the hidden field
+      btn.disabled = true; btn.textContent = "Adding…";
+      try {
+        // Google Forms sends no CORS headers: a no-cors POST is accepted but its response can't be read.
+        await fetch(ACTION, { method: "POST", mode: "no-cors", body: new URLSearchParams({ [`entry.${ENTRY_ID}`]: v }) });
+        f.style.display = "none"; document.getElementById(okId).style.display = "block";
+      } catch (_) {
+        btn.disabled = false; btn.textContent = "Get early access"; err.style.display = "block";
+      }
+    });
+  }
+  wire("wl", "email", "btn", "ok");
+  wire("wl2", "email2", "btn2", "ok2");
+</script>
+</body>
+</html>
