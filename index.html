@@ -4,68 +4,104 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NADNAPS · it tells you when you're wrong</title>
-<meta name="description" content="A Linux terminal app for NSE research: builds its own point-in-time database and tests trading rules against random portfolios. Early access waitlist.">
+<meta name="description" content="Test trading rules on NSE data since 2010 against 1,000 random portfolios, on your own computer. A terminal app for Linux and Windows 11. Early access waiting list.">
 <meta property="og:title" content="NADNAPS · it tells you when you're wrong">
-<meta property="og:description" content="Test trading rules on NSE data since 2010, against random portfolios, in your Linux terminal. Join the early-access list.">
-<meta property="og:image" content="img/console.jpg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<meta property="og:description" content="Every trading rule we tested failed to beat random picks. Test yours on NSE data since 2010, against 1,000 random portfolios. Join the early-access list.">
+<meta property="og:image" content="https://nadnaps-app.github.io/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect x='8' y='8' width='240' height='240' rx='56' fill='%23161616'/%3E%3Cpath d='M36 150 C76 150 88 70 128 80 S184 140 220 58' stroke='%23D97757' stroke-width='30' fill='none' stroke-linecap='round'/%3E%3Cpath d='M36 196 C84 192 98 136 140 140 S192 172 220 124' stroke='%237AA2F7' stroke-width='26' fill='none' stroke-linecap='round'/%3E%3Cpath d='M36 234 C96 230 116 196 156 196 S200 206 220 188' stroke='%23E0AF68' stroke-width='22' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
-  /* NADNAPS sub-brand (brand.json palette_nadnaps): gruvbox, JetBrains Mono */
-  :root { --bg:#1d2021; --bg2:#282828; --line:#3c3836; --fg:#ebdbb2; --muted:#a89984; --y:#fabd2f; --y2:#d79921; --red:#fb4934; --aqua:#8ec07c; --green:#b8bb26; }
+  /* The app's own design values (nadnaps/style.py, the Design rules in its CLAUDE.md): one palette in light and dark,
+     one accent (the logo's orange), green / amber only for meaning, the system font, two corner sizes. */
+  :root { --bg:#FAF9F5; --card:#FFFFFF; --soft:#F0EEE6; --line:#E3E0D6; --fg:#1F1F1F; --muted:#6B6B6B;
+          --accent:#C15F3C; --pos:#385F0D; --warn:#8F5E15; --blue:#3D59A1; --r-control:6px; --r-card:10px; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#161616; --card:#1E1E1E; --soft:#2A2A2A; --line:#2A2A2A; --fg:#E4E4E4; --muted:#9A9A9A;
+            --accent:#D97757; --pos:#9ECE6A; --warn:#E0AF68; --blue:#7AA2F7; }
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--fg); font: 400 17px/1.6 "JetBrains Mono", ui-monospace, monospace; }
-  a { color: var(--y); }
-  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
-  header { padding: 22px 0; }
-  .logo { display: inline-flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: .14em; text-decoration: none; color: var(--fg); }
-  .logo i { width: 36px; height: 36px; border-radius: 8px; background: var(--y); color: var(--bg); font: 800 22px/36px "JetBrains Mono"; text-align: center; font-style: normal; }
-  .hero { padding: 56px 0 40px; }
-  .kicker { color: var(--y2); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: 14px; }
-  h1 { font-size: clamp(36px, 7vw, 68px); line-height: 1.05; font-weight: 800; letter-spacing: -.02em; margin: 14px 0 20px; }
-  h1 span { color: var(--y); }
-  .lead { color: var(--muted); font-size: clamp(17px, 2.4vw, 20px); max-width: 720px; }
+  body { background: var(--bg); color: var(--fg); font: 400 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent); }
+  code, .term { font-family: ui-monospace, "JetBrains Mono", SFMono-Regular, Menlo, Consolas, monospace; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+  header { padding: 24px 0; display: flex; align-items: center; justify-content: space-between; }
+  .logo { display: inline-flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: .08em;
+          text-decoration: none; color: var(--fg); font-size: 18px; }
+  .logo svg { width: 36px; height: 36px; display: block; }
+  .nav a { color: var(--muted); text-decoration: none; margin-left: 24px; font-size: 15px; }
+  .nav a:hover { color: var(--fg); }
+  .hero { padding: 48px 0 32px; }
+  .kicker { color: var(--muted); font-size: 15px; }
+  h1 { font-size: clamp(40px, 7vw, 72px); line-height: 1.04; font-weight: 800; letter-spacing: -.025em; margin: 12px 0 20px; }
+  h1 span { color: var(--accent); }
+  .lead { color: var(--muted); font-size: clamp(18px, 2.4vw, 21px); max-width: 740px; }
   .lead b { color: var(--fg); font-weight: 600; }
-  form { margin-top: 34px; display: flex; flex-wrap: wrap; gap: 12px; max-width: 620px; }
-  input[type=email] { flex: 1 1 280px; padding: 15px 16px; border-radius: 10px; border: 2px solid var(--line); background: var(--bg2);
-                      color: var(--fg); font: inherit; }
-  input[type=email]:focus { outline: none; border-color: var(--y); }
-  button { padding: 15px 22px; border: 0; border-radius: 10px; background: var(--y); color: var(--bg); font: 800 16px "JetBrains Mono"; cursor: pointer; }
+  form { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; max-width: 620px; }
+  input[type=email] { flex: 1 1 280px; padding: 14px 16px; border-radius: var(--r-control); border: 1px solid var(--line);
+                      background: var(--card); color: var(--fg); font: inherit; }
+  input[type=email]:focus { outline: none; border-color: var(--accent); }
+  button { padding: 14px 24px; border: 0; border-radius: var(--r-control); background: var(--accent); color: #FFFFFF;
+           font: 600 16px system-ui, -apple-system, "Segoe UI", sans-serif; cursor: pointer; }
   button:disabled { opacity: .6; cursor: default; }
   .hp { position: absolute; left: -9999px; }
-  .formnote { margin-top: 12px; color: var(--muted); font-size: 14px; }
-  .ok { display: none; margin-top: 18px; padding: 16px 18px; border-radius: 10px; background: var(--bg2); border: 2px solid var(--green); color: var(--fg); }
-  .err { display: none; margin-top: 12px; color: var(--red); font-size: 14px; }
-  .term { background: var(--bg2); border: 2px solid var(--line); border-radius: 14px; padding: 18px 22px; margin: 22px 0; font-size: 16px; overflow-x: auto; }
-  .term .p { color: var(--green); } .term .a { color: var(--aqua); } .term .r { color: var(--red); } .term .c { color: var(--muted); }
-  section { padding: 44px 0; border-top: 2px solid var(--line); }
-  h2 { font-size: clamp(24px, 4vw, 34px); line-height: 1.2; font-weight: 800; margin-bottom: 14px; }
-  h2 span { color: var(--y); }
+  .formnote { margin-top: 12px; color: var(--muted); font-size: 15px; }
+  .ok { display: none; margin-top: 16px; padding: 16px 20px; border-radius: var(--r-card); background: var(--card);
+        border: 1px solid var(--line); border-left: 4px solid var(--pos); }
+  .err { display: none; margin-top: 12px; color: var(--warn); font-size: 15px; }
+  video { width: 100%; border-radius: var(--r-card); border: 1px solid var(--line); display: block; margin-top: 32px;
+          background: #161616; }
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(26px, 4vw, 36px); line-height: 1.2; font-weight: 800; letter-spacing: -.01em; margin-bottom: 12px; }
+  h2 span { color: var(--accent); }
   p + p { margin-top: 12px; }
+  .muted { color: var(--muted); }
   figure { margin-top: 24px; }
-  figure img { width: 100%; border-radius: 12px; border: 2px solid var(--line); display: block; }
-  figcaption { color: var(--muted); font-size: 14px; margin-top: 10px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 22px; }
-  .card { background: var(--bg2); border: 2px solid var(--line); border-radius: 12px; padding: 18px 20px; }
-  .card h3 { font-size: 17px; color: var(--y); margin-bottom: 6px; }
+  figure img { width: 100%; border-radius: var(--r-card); border: 1px solid var(--line); display: block; }
+  figcaption { color: var(--muted); font-size: 15px; margin-top: 8px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 24px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-card); padding: 16px 24px; }
+  .stat .v { font-size: 32px; font-weight: 800; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+  .stat .l { color: var(--muted); font-size: 15px; }
+  .board { margin-top: 24px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-card); }
+  .row { display: flex; justify-content: space-between; gap: 16px; padding: 8px 24px; border-bottom: 1px solid var(--line); font-size: 16px; }
+  .row:last-child { border-bottom: 0; }
+  .row code { font-size: 15px; } .row .w { color: var(--muted); }
+  .warn { color: var(--warn); } .pos { color: var(--pos); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-card); padding: 16px 24px; }
+  .card h3 { font-size: 17px; margin-bottom: 4px; }
   .card p { color: var(--muted); font-size: 15px; }
-  ul.req { list-style: none; margin-top: 14px; }
+  .term { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-card); padding: 16px 24px;
+          margin: 24px 0 0; font-size: 15px; overflow-x: auto; line-height: 1.8; }
+  .term .p { color: var(--muted); } .term .a { color: var(--pos); } .term .c { color: var(--muted); }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; }
+  ul.req { list-style: none; margin-top: 12px; }
   ul.req li { padding: 8px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
   ul.req li b { color: var(--fg); font-weight: 600; }
-  .disc { color: var(--muted); font-size: 14px; }
-  footer { padding: 34px 0 60px; color: var(--muted); font-size: 14px; border-top: 2px solid var(--line); }
+  .disc { color: var(--muted); font-size: 15px; }
+  footer { padding: 32px 0 64px; color: var(--muted); font-size: 15px; border-top: 1px solid var(--line); }
+  @media (max-width: 640px) { .nav { display: none; } .row { flex-direction: column; gap: 0; } .two { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header><a class="logo" href="#"><i>N</i>NADNAPS</a></header>
+  <header>
+    <a class="logo" href="#">
+      <svg viewBox="0 0 256 256" aria-hidden="true"><rect x="8" y="8" width="240" height="240" rx="56" fill="#161616"/>
+        <path d="M36 150 C76 150 88 70 128 80 S184 140 220 58" stroke="#D97757" stroke-width="30" fill="none" stroke-linecap="round"/>
+        <path d="M36 196 C84 192 98 136 140 140 S192 172 220 124" stroke="#7AA2F7" stroke-width="26" fill="none" stroke-linecap="round"/>
+        <path d="M36 234 C96 230 116 196 156 196 S200 206 220 188" stroke="#E0AF68" stroke-width="22" fill="none" stroke-linecap="round"/></svg>
+      NADNAPS</a>
+    <nav class="nav"><a href="#scoreboard">Scoreboard</a><a href="#features">What's inside</a><a href="#need">What you need</a></nav>
+  </header>
 
   <div class="hero">
-    <div class="kicker">Linux terminal app · NSE India · early access</div>
+    <div class="kicker">A terminal app for NSE India · Linux and Windows 11 · early access</div>
     <h1>It tells you when <span>you're wrong.</span></h1>
-    <p class="lead">NADNAPS builds a clean, point-in-time database from NSE's own public files on your computer, then tests
-      trading rules against random baselines. <b>A rule counts as an edge only if it beats random picks on data it was not designed on.</b></p>
+    <p class="lead">NADNAPS builds a clean, point-in-time database from NSE's own public files on your computer, then races
+      your trading rule against <b>1,000 random portfolios</b> with the same stocks, exits and costs. A rule counts as an
+      edge only if it beats random picks on years it was not designed on.</p>
 
     <form id="wl" novalidate>
       <input type="email" id="email" name="email" placeholder="you@email.com" autocomplete="email" required aria-label="Email address">
@@ -75,58 +111,94 @@
     <div class="formnote">One email when the download is ready. No spam, no tips.</div>
     <div class="err" id="err">That didn't go through. Please try again, or use <a id="fallback" href="#">this form</a>.</div>
     <div class="ok" id="ok">You're on the list. We'll email you when NADNAPS is ready to download.</div>
+
+    <video controls preload="none" playsinline poster="img/video-poster.jpg" aria-label="NADNAPS in 60 seconds">
+      <source src="video/nadnaps.mp4" type="video/mp4">
+    </video>
   </div>
 
-  <section>
+  <section id="scoreboard">
     <h2>The honest answer, <span>so far</span></h2>
-    <p>Every famous swing-trading rule tested in NADNAPS so far did no better than random picks or simply holding the market.
-      That's not a bug. It's the point: a backtest only means something once it's compared with random picks.</p>
+    <p>Every trading rule tested in NADNAPS so far did no better than random picks. That's not a bug. It's the point: a
+      backtest only means something once it's compared with random picks on years it never saw.</p>
+    <div class="stats">
+      <div class="stat"><div class="v">10</div><div class="l">rules tested</div></div>
+      <div class="stat"><div class="v warn">0</div><div class="l">survived</div></div>
+      <div class="stat"><div class="v">1,000</div><div class="l">random portfolios per test</div></div>
+      <div class="stat"><div class="v">74%</div><div class="l">of random picks did as well as <code>hi52_v1</code> on years it never saw</div></div>
+    </div>
+    <div class="board">
+      <div class="row"><span><code>swing_v1</code> <span class="w">the original scanner rule</span></span><span class="warn">no edge</span></div>
+      <div class="row"><span><code>lowvol_trend_v1</code> <span class="w">passed validation, failed its locked test</span></span><span class="warn">no edge</span></div>
+      <div class="row"><span><code>ma_stack_v1</code> <span class="w">moving-average stack</span></span><span class="warn">no edge</span></div>
+      <div class="row"><span><code>donchian_v1</code> <span class="w">Turtle breakout</span></span><span class="warn">no edge</span></div>
+      <div class="row"><span><code>ichimoku_v1</code> <span class="w">cloud breakout</span></span><span class="warn">no edge</span></div>
+      <div class="row"><span><code>knox_div_v1</code> <span class="w">Knoxville divergence</span></span><span class="warn">no edge</span></div>
+      <div class="row"><span><code>mom_12_1_v1</code> <span class="w">12-1 momentum</span></span><span class="warn">no edge</span></div>
+      <div class="row"><span><code>hi52_v1</code> <span class="w">near the 52-week high: passed training, failed unseen years</span></span><span class="warn">no edge</span></div>
+      <div class="row"><span><code>rsi2_v1</code> <span class="w">Connors RSI(2)</span></span><span class="warn">no edge</span></div>
+      <div class="row"><span><code>pead_v1</code> <span class="w">post-earnings drift</span></span><span class="warn">no edge</span></div>
+    </div>
     <figure>
-      <img src="img/console.jpg" alt="NADNAPS research console dashboard: 59 backtest runs, 6 of 10 validation looks left, and the note that no run has passed yet." loading="lazy">
-      <figcaption>The research console: every run, its verdict, and whether the best result could be luck.</figcaption>
+      <img src="img/console.jpg" alt="The NADNAPS research console: data to Tue 27 Oct, 59 backtest runs, 6 of 10 validation looks left, and the note that no run has passed yet." loading="lazy">
+      <figcaption>The research console, in your browser: every run, its verdict, and whether the best result could be luck.</figcaption>
     </figure>
   </section>
 
   <section>
     <h2>Did I <span>fool myself?</span></h2>
-    <p>Test periods are fixed in advance, validation looks are counted and limited, and a registered rule can't be quietly changed afterwards.
-      One screen exists just to ask whether your best result is luck.</p>
+    <p>Test periods are fixed in advance, looks at unseen years are counted and limited to ten, and a locked rule can't be
+      quietly changed afterwards. One screen exists just to ask whether your best result is luck: it counts every try,
+      the chance the best one looks this good by luck alone, and how likely the setting was overfitted.</p>
     <figure>
-      <img src="img/honesty.jpg" alt="The 'Did I fool myself?' screen listing strategies, tries, best Sharpe, the chance it's luck, and a 'no edge' status." loading="lazy">
-      <figcaption>Each strategy family: tries, best result, and the chance that result is luck alone.</figcaption>
+      <img src="img/honesty.jpg" alt="The 'Did I fool myself?' screen: each strategy with its data, tries, best Sharpe, chance it's luck and status." loading="lazy">
+      <figcaption>Every strategy family: tries, best result, the chance it's luck, and its status.</figcaption>
     </figure>
   </section>
 
-  <section>
-    <h2>Write a rule in <span>plain text</span></h2>
-    <div class="term">
-      <div><span class="p">$</span> nadnaps rule check <span class="a">"close &gt; sma(200) and rsi(14) &lt; 35"</span></div>
-      <div><span class="p">$</span> nadnaps research my_rule train <span class="c"># 2012–2017, against random picks</span></div>
-      <div><span class="p">$</span> nadnaps stress my_rule <span class="c"># rerun at 1.5x and 2x costs</span></div>
+  <section id="features">
+    <h2>What's <span>inside</span></h2>
+    <div class="two">
+      <figure style="margin-top:0">
+        <img src="img/app.jpg" alt="The NADNAPS terminal app: the strategy picker above the lists, Markets / My lists / NSE indices, and a table of stocks with entry conditions met this month." loading="lazy">
+        <figcaption>Your lists with today's signals: <span class="pos">● entry</span> and <span class="warn">● exit</span>, when each started.</figcaption>
+      </figure>
+      <figure style="margin-top:0">
+        <img src="img/chart.jpg" alt="A company panel: price with 20, 50 and 200-day averages, entry marks, and today's numbers." loading="lazy">
+        <figcaption>A chart and the key numbers for every company, with the rule's entry and exit days.</figcaption>
+      </figure>
     </div>
     <div class="grid">
-      <div class="card"><h3>66 textbook rules</h3><p>Start from a ready-made template, each marked "not tested here" unless it was, with what that test found.</p></div>
-      <div class="card"><h3>Your own rules</h3><p>MACD, Bollinger, ADX, stochastics, delivery %, Nifty, market breadth, weekly bars. Rank buys, set targets and stops.</p></div>
-      <div class="card"><h3>Against random portfolios</h3><p>Every run is compared with random picks using the same exits, sizing and costs.</p></div>
-      <div class="card"><h3>Real costs</h3><p>STT, stamp duty, exchange fees, DP charges, slippage. Re-price any run at Zerodha, Dhan, Groww, Angel One or Upstox charges.</p></div>
-      <div class="card"><h3>Reports you can open</h3><p>Verdict, charts, every trade, results by market regime, tax estimate by financial year.</p></div>
-      <div class="card"><h3>Stays on your computer</h3><p>Nothing about your lists, rules or results is ever sent anywhere.</p></div>
+      <div class="card"><h3>Clean NSE data, on your computer</h3><p>Every trading day since 2010 from NSE's own files, adjusted for splits, bonuses and demergers, with the top 300 as it was each month. 24 checks run every night.</p></div>
+      <div class="card"><h3>Lists and signals</h3><p>Top 300 / 100 / 50 by turnover, NSE index lists (Nifty 50 to Nifty 500) and your own lists, with notes, industries, and what the strategy says today, this week, month or year.</p></div>
+      <div class="card"><h3>66 textbook rules, or your own</h3><p>Start from a template, or write one in plain text: MACD, Bollinger, ADX, stochastics, delivery %, Nifty, market breadth, weekly bars, ranks, targets and stops.</p></div>
+      <div class="card"><h3>Against random portfolios</h3><p>Every test runs your rule against 1,000 random portfolios with the same exits, sizing and costs, then says plainly whether it could be luck.</p></div>
+      <div class="card"><h3>Real costs</h3><p>STT, stamp duty, exchange fees, GST, DP charges, slippage and liquidity limits. Re-price any test at Zerodha, Dhan, Groww, Angel One or Upstox charges, at your own capital.</p></div>
+      <div class="card"><h3>Reports and a console</h3><p>A report for every test: verdict, charts, every trade, higher-cost reruns, market regimes and a tax estimate by financial year. The console puts every run, trade and tax year on one page.</p></div>
+      <div class="card"><h3>Paper books</h3><p>Lock a rule and keep a would-be trading log from the next day on, never rewritten afterwards.</p></div>
+      <div class="card"><h3>Up to date by itself</h3><p>An evening update fetches the newest trading day. "New today" lists every signal that just started, and alerts can come by email.</p></div>
+      <div class="card"><h3>Calm by design</h3><p>A clean terminal app: few buttons, undo instead of "are you sure?", one shortcut list. Export any table as CSV. Nothing about your lists, rules or results leaves your computer.</p></div>
+    </div>
+    <div class="term">
+      <div><span class="p">$</span> nadnaps rule check <span class="a">"close &gt; sma(200) and rsi(14) &lt; 35"</span></div>
+      <div><span class="p">$</span> nadnaps research my_rule train <span class="c"># 2012-2017, against 1,000 random portfolios</span></div>
+      <div><span class="p">$</span> nadnaps stress my_rule <span class="c"># rerun at 1.5x and 2x costs</span></div>
     </div>
     <figure>
-      <img src="img/reports.jpg" alt="The Reports screen in the NADNAPS terminal app, listing backtest runs with years, data split, CAGR, Sharpe, trades and verdict." loading="lazy">
-      <figcaption>The terminal app: every run with its data split and verdict.</figcaption>
+      <img src="img/report.jpg" alt="A NADNAPS report: the verdict and its criteria, then CAGR, Sharpe, drawdown, trades, net P&L, exposure and an after-tax estimate." loading="lazy">
+      <figcaption>A report for every test: the verdict first, then the numbers behind it.</figcaption>
     </figure>
   </section>
 
-  <section>
+  <section id="need">
     <h2>What you need</h2>
     <ul class="req">
-      <li><b>Linux</b> (Windows and macOS are not tested yet)</li>
-      <li><b>Python 3.12, 3.13 or 3.14</b>, installed with pipx</li>
-      <li><b>About 4 GB of RAM</b>, and <b>about 8 GB of disk</b> for the first setup (about 3 GB afterwards)</li>
-      <li><b>Internet</b> for NSE's public files: history since 2010 on first setup, then daily updates</li>
+      <li><b>Windows 11 or Linux.</b> Windows 10 and macOS are not tested yet.</li>
+      <li><b>Windows:</b> one installer that brings its own Python. <b>Linux:</b> Python 3.12, 3.13 or 3.14, installed with pipx.</li>
+      <li><b>About 4 GB of RAM</b>, and <b>about 8 GB of disk</b> for the first setup (about 3 GB afterwards).</li>
+      <li><b>Internet</b> for NSE's public files: the history since 2010 on first setup (a few hours, in the background), then a short update each evening.</li>
     </ul>
-    <form id="wl2" novalidate style="margin-top:30px">
+    <form id="wl2" novalidate style="margin-top:32px">
       <input type="email" id="email2" placeholder="you@email.com" autocomplete="email" required aria-label="Email address">
       <button type="submit" id="btn2">Get early access</button>
     </form>
@@ -134,8 +206,9 @@
   </section>
 
   <section>
-    <p class="disc"><b>Research and education tool.</b> NADNAPS gives no buy or sell recommendations and no investment advice.
-      Past results do not predict future returns. Your email is used only to tell you when NADNAPS launches.</p>
+    <p class="disc"><b>Research and education tool. Information only, not investment advice.</b> NADNAPS gives no buy or
+      sell recommendations; "entry condition met" means a rule's conditions are true, not a tip. Past results do not
+      predict future returns. Your email is used only to tell you when NADNAPS launches.</p>
   </section>
 
   <footer>
